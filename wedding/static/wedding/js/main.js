@@ -228,7 +228,7 @@
     function renumberCards() {
       $$('#aw-guests .aw-guest').forEach(function (card, i) {
         var t = card.querySelector('.aw-guest-title');
-        if (t) t.textContent = 'Guest ' + (i + 1);
+        if (t) t.textContent = 'Guest ' + (i + 1) + (i === 0 ? ' (This is you)' : '');
       });
     }
 
@@ -253,7 +253,7 @@
 
       card.innerHTML =
         '<button type="button" class="aw-icon-btn aw-guest-delete" aria-label="Remove guest">&times;</button>' +
-        '<div class="aw-guest-title">Guest ' + number + '</div>' +
+        '<div class="aw-guest-title">Guest ' + number + (number === 1 ? ' (This is you)' : '') + '</div>' +
         '<div class="aw-guest-row">' +
           '<input type="text" class="aw-guest-name" placeholder="Full name" value="' + escAttr(prefill.name) + '">' +
           '<select class="aw-guest-type">' +
