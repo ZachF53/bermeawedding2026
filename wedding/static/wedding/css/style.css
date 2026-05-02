@@ -442,9 +442,13 @@ input, textarea, select, button { font-family: 'Lora', serif; }
 @media (min-width: 600px) { .aw-grid2 { grid-template-columns: repeat(2, 1fr); } }
 .aw-field { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
 .aw-field span { font-weight: 600; color: #444; }
+/* Scope the text-input styling so it does NOT swallow the checkbox inside
+   each event chip — that selector used to be just ".aw-guest input" and
+   it inflated the chip's checkbox into a 100%-wide rounded pill, pushing
+   the chip's text label outside the pill on mobile. */
 .aw-field input,
 .aw-field textarea,
-.aw-guest input,
+.aw-guest input:not([type="checkbox"]):not([type="radio"]),
 .aw-guest select {
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -456,7 +460,7 @@ input, textarea, select, button { font-family: 'Lora', serif; }
 }
 .aw-field input:focus,
 .aw-field textarea:focus,
-.aw-guest input:focus,
+.aw-guest input:not([type="checkbox"]):not([type="radio"]):focus,
 .aw-guest select:focus {
   outline: none;
   border-color: var(--gold);
