@@ -261,6 +261,22 @@ class RSVPSubmitTests(TestCase):
         ))
         self.assertEqual(response.status_code, 404)
 
+    def test_submit_persists_adult_and_child_types(self):
+        payload = self._payload(guests=[
+            {'id': 'g1', 'name': 'Alice Smith', 'type': 'adult', 'events': ['Ceremony']},
+            {'id': 'g2', 'name': 'Bobby Smith', 'type': 'child', 'events': ['Ceremony']},
+            {'id': 'g3', 'name': 'Mystery Guest',                'events': ['Ceremony']},  # missing type defaults to adult
+        ])
+        response = self._post(payload)
+        self.assertEqual(response.status_code, 200, response.content)
+        sub = RSVPSubmission.objects.get(pk=response.json()['id'])
+        rows = list(sub.guests.order_by('first_name'))
+        self.assertEqual(len(rows), 3)
+        by_name = {g.first_name: g.guest_type for g in rows}
+        self.assertEqual(by_name['Alice'], 'adult')
+        self.assertEqual(by_name['Bobby'], 'child')
+        self.assertEqual(by_name['Mystery'], 'adult')
+
     def test_submit_falls_back_to_email_lookup(self):
         # invite_id missing but contact email matches an InvitedGuest
         payload = self._payload()

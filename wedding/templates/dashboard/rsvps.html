@@ -31,7 +31,10 @@
         <td>
           {% for e in r.event_selections.all %}{{ e.event_name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
         </td>
-        <td>{{ r.guests.count }}</td>
+        <td>
+          {{ r.guests.count }}
+          {% if r.guests.count %}<span style="color:#888; font-size:0.85em;">(Adults: {{ r.adult_count }}, Children: {{ r.child_count }})</span>{% endif %}
+        </td>
         <td>{{ r.submitted_at|date:"M j, Y g:i A" }}</td>
         <td class="actions-cell">
           <a href="{% url 'wedding:dashboard_rsvp_detail' r.pk %}" class="btn-gold btn-sm">View</a>

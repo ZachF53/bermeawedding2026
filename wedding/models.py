@@ -87,13 +87,20 @@ class RSVPSubmission(models.Model):
 
 
 class RSVPGuest(models.Model):
+    GUEST_TYPE_CHOICES = [('adult', 'Adult'), ('child', 'Child')]
+
     rsvp = models.ForeignKey(
         RSVPSubmission,
         on_delete=models.CASCADE,
         related_name='guests',
     )
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100, blank=True)
+    last_name = models.CharField(max_length=100, blank=True)
+    guest_type = models.CharField(
+        max_length=10,
+        choices=GUEST_TYPE_CHOICES,
+        default='adult',
+    )
 
     class Meta:
         ordering = ['last_name', 'first_name']

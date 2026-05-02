@@ -9,7 +9,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.db import transaction
-from django.db.models import Q, Sum
+from django.db.models import Count, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -185,16 +185,22 @@ def rsvp_submit(request):
 
             stored_guests = 0
             for g in guests:
-                name = (g.get('name') or '').strip() if isinstance(g, dict) else ''
+                if not isinstance(g, dict):
+                    continue
+                name = (g.get('name') or '').strip()
                 if not name:
                     continue
                 parts = name.split(None, 1)
                 first = parts[0]
                 last = parts[1] if len(parts) > 1 else ''
+                guest_type = (g.get('type') or '').strip().lower()
+                if guest_type not in ('adult', 'child'):
+                    guest_type = 'adult'
                 RSVPGuest.objects.create(
                     rsvp=submission,
                     first_name=first,
                     last_name=last,
+                    guest_type=guest_type,
                 )
                 stored_guests += 1
 
@@ -504,6 +510,10 @@ def dashboard_rsvps(request):
         RSVPSubmission.objects
         .select_related('invited_guest')
         .prefetch_related('guests', 'event_selections')
+        .annotate(
+            adult_count=Count('guests', filter=Q(guests__guest_type='adult')),
+            child_count=Count('guests', filter=Q(guests__guest_type='child')),
+        )
         .order_by('-submitted_at')
     )
     search = (request.GET.get('search') or '').strip()

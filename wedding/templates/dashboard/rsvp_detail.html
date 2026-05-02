@@ -72,8 +72,8 @@
         {% for g in rsvp.guests.all %}
           <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ g.first_name }} {{ g.last_name }}</td>
-            <td>—</td>
+            <td>{{ g.first_name }} {{ g.last_name }}{% if not g.first_name and not g.last_name %}<span style="color:#999;">—</span>{% endif %}</td>
+            <td>{{ g.get_guest_type_display }}</td>
           </tr>
         {% empty %}
           <tr><td colspan="3" style="text-align:center; color:#999;">No guests listed.</td></tr>
