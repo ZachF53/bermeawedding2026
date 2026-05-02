@@ -235,7 +235,13 @@ server {
     }
 
     location / {
-        include proxy_params;
+        # Do NOT 'include proxy_params;' here — Ubuntu's proxy_params already
+        # sets Host/X-Real-IP/X-Forwarded-For/X-Forwarded-Proto, so adding it
+        # alongside the explicit proxy_set_header lines below sends every
+        # header *twice*. Two Host headers violates RFC 7230, Django's
+        # request parser raises BadRequest, and every page returns 400.
+        # We use $host (no port) instead of proxy_params' $http_host (with
+        # port), which is the more conservative default for ALLOWED_HOSTS.
         proxy_pass http://unix:${APP_DIR}/bermeawedding.sock;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
