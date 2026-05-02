@@ -188,9 +188,14 @@ User=${APP_USER}
 Group=www-data
 WorkingDirectory=${APP_DIR}
 Environment="PATH=${APP_DIR}/venv/bin"
+# --umask 007 makes the unix socket mode 0660 instead of gunicorn's
+# default 0600, so nginx (running as www-data, in the wedding group via
+# Group= above) can read+write it. Without this, nginx hits a 502 with
+# "connect() ... Permission denied" on every request.
 ExecStart=${APP_DIR}/venv/bin/gunicorn \\
     --access-logfile - \\
     --workers 3 \\
+    --umask 007 \\
     --bind unix:${APP_DIR}/bermeawedding.sock \\
     bermeawedding.wsgi:application
 Restart=always
