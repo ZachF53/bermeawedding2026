@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}B&amp;A Admin{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{% static 'wedding/images/bouquet-img.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400|Dancing+Script:700&display=fallback">
+  <link rel="stylesheet" href="{% static 'wedding/css/dashboard.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="dashboard">
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>B&amp;A Admin</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="{% url 'wedding:dashboard_home' %}"       class="{% if active_page == 'home'   %}active{% endif %}">🏠 Dashboard</a>
+      <a href="{% url 'wedding:dashboard_guests' %}"     class="{% if active_page == 'guests' %}active{% endif %}">👥 Guest List</a>
+      <a href="{% url 'wedding:dashboard_rsvps' %}"      class="{% if active_page == 'rsvps'  %}active{% endif %}">📋 RSVPs</a>
+      <a href="{% url 'wedding:dashboard_import' %}"     class="{% if active_page == 'import' %}active{% endif %}">📥 Import Guests</a>
+      <a href="{% url 'wedding:dashboard_guest_add' %}"  class="{% if active_page == 'add'    %}active{% endif %}">➕ Add Guest</a>
+      <a href="{% url 'wedding:dashboard_logout' %}">🚪 Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      Logged in as<br><strong>{{ request.user.username }}</strong>
+    </div>
+  </aside>
+
+  <main class="main">
+    {% if messages %}
+      {% for m in messages %}
+        <div class="msg msg-{{ m.tags|default:'success' }}">{{ m }}</div>
+      {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+</body>
+</html>

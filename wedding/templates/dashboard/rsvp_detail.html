@@ -1,0 +1,94 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}RSVP Detail — B&amp;A Admin{% endblock %}
+{% block content %}
+
+<div style="margin-bottom:14px;">
+  <a href="{% url 'wedding:dashboard_rsvps' %}" class="btn-outline btn-sm">&larr; Back to RSVPs</a>
+</div>
+
+<h1 class="page-title">{{ rsvp.invited_guest.first_name }} {{ rsvp.invited_guest.last_name }}</h1>
+
+<div class="detail-grid">
+
+  <div class="detail-card">
+    <h2>Household Info</h2>
+    <dl>
+      <dt>Invited Guest</dt>
+      <dd>
+        <a href="{% url 'wedding:dashboard_guest_edit' rsvp.invited_guest.pk %}">
+          {{ rsvp.invited_guest.first_name }} {{ rsvp.invited_guest.last_name }}
+        </a>
+      </dd>
+      <dt>Email</dt>
+      <dd>{{ rsvp.invited_guest.email|default:"—" }}</dd>
+      <dt>Phone</dt>
+      <dd>{{ rsvp.invited_guest.phone|default:"—" }}</dd>
+      <dt>Partner</dt>
+      <dd>{{ rsvp.invited_guest.partner_name|default:"—" }}</dd>
+      <dt>Max Allowed</dt>
+      <dd>{{ rsvp.invited_guest.max_guests }}</dd>
+      <dt>RSVPed</dt>
+      <dd>
+        {% if rsvp.invited_guest.rsvped %}
+          <span class="badge-green">✓ Yes</span>
+        {% else %}
+          <span class="badge-gray">No</span>
+        {% endif %}
+      </dd>
+      <dt>Current Count</dt>
+      <dd>{{ rsvp.invited_guest.current_guests }}</dd>
+    </dl>
+  </div>
+
+  <div class="detail-card">
+    <h2>RSVP Submission</h2>
+    <dl>
+      <dt>Submitted</dt>
+      <dd>{{ rsvp.submitted_at|date:"M j, Y g:i A" }}</dd>
+      <dt>Attending</dt>
+      <dd>
+        {% if rsvp.attending %}
+          <span class="badge-green">Joyfully accepting</span>
+        {% else %}
+          <span class="badge-gray">Regretfully declining</span>
+        {% endif %}
+      </dd>
+      <dt>Contact Email</dt>
+      <dd>{{ rsvp.email|default:"—" }}</dd>
+      <dt>Contact Phone</dt>
+      <dd>{{ rsvp.phone|default:"—" }}</dd>
+      <dt>Events</dt>
+      <dd>
+        {% for e in rsvp.event_selections.all %}{{ e.event_name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
+      </dd>
+    </dl>
+
+    <h3 style="margin:14px 0 6px; color:#dba367; font-family:'Dancing Script',handwriting; font-size:1.2rem;">
+      All Guests in Party
+    </h3>
+    <table class="inner-table">
+      <thead><tr><th>#</th><th>Full Name</th><th>Type</th></tr></thead>
+      <tbody>
+        {% for g in rsvp.guests.all %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ g.first_name }} {{ g.last_name }}</td>
+            <td>—</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3" style="text-align:center; color:#999;">No guests listed.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+{% if rsvp.notes %}
+<div class="notes-card">
+  <strong style="color:#dba367; font-family:'Dancing Script',handwriting; font-size:1.2rem;">Notes</strong><br>
+  {{ rsvp.notes }}
+</div>
+{% endif %}
+
+{% endblock %}

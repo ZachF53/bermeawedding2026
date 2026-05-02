@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Brian &amp; Aisha Wedding{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{% static 'wedding/images/bouquet-img.png' %}">
+  <link rel="shortcut icon" type="image/png" href="{% static 'wedding/images/bouquet-img.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'wedding/images/bouquet-img.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400|Dancing+Script:700&display=fallback">
+  <link rel="stylesheet" href="{% static 'wedding/css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  {% block content %}{% endblock %}
+  <footer style="background-color:#dba367; min-height:80px; display:flex; align-items:center; justify-content:center; border-top:1px solid #F2F5F7; padding:20px 16px;">
+    <p style="color:#ffffff; margin:0; text-align:center; font-family:'Lora',serif; font-size:0.95rem;">
+      Copyright 2026 Brian &amp; Aisha Wedding
+    </p>
+  </footer>
+  <script src="{% static 'wedding/js/main.js' %}"></script>
+  {% block extra_scripts %}{% endblock %}
+  <a href="/dashboard/login/" style="position:fixed; bottom:0; right:0; width:20px; height:20px; opacity:0; cursor:default;" tabindex="-1" aria-hidden="true"></a>
+</body>
+</html>

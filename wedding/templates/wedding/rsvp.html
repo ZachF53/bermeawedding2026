@@ -1,0 +1,126 @@
+{% extends 'wedding/base.html' %}
+{% block title %}RSVP — Brian &amp; Aisha Wedding{% endblock %}
+{% block content %}
+<div class="aw-rsvp">
+
+  <header class="aw-rsvp-hero">
+    <h1 class="aw-rsvp-title">RSVP</h1>
+    <div class="aw-rsvp-sub aw-hide-meta" id="aw-header-meta">
+      <strong id="aw-household-label">Your household</strong>
+      &nbsp;<span id="aw-count">0</span>/<span id="aw-max">2</span>
+    </div>
+  </header>
+
+  <!-- Step 1: Lookup -->
+  <section class="aw-card aw-lookup-card" id="aw-rsvp-gate">
+    <h2 class="aw-h2">Find your invite</h2>
+    <p class="aw-muted">Enter the email we sent your invitation to. If you don't have an email on file, you can search by name.</p>
+
+    <label class="aw-field">
+      <span>Email on invite</span>
+      <input type="email" id="aw-lookup-email" placeholder="name@example.com">
+    </label>
+
+    <div class="aw-row">
+      <button type="button" class="aw-btn aw-btn-primary" id="aw-lookup-btn">Continue</button>
+      <button type="button" class="aw-btn" id="aw-lookup-name-toggle">I don't have an email</button>
+    </div>
+
+    <div id="aw-lookup-name-wrap" style="display:none; margin-top:1rem;">
+      <div class="aw-grid2">
+        <label class="aw-field">
+          <span>First name</span>
+          <input type="text" id="aw-lookup-first" placeholder="First name">
+        </label>
+        <label class="aw-field">
+          <span>Last name</span>
+          <input type="text" id="aw-lookup-last" placeholder="Last name">
+        </label>
+      </div>
+      <button type="button" class="aw-btn" id="aw-lookup-name-btn" style="margin-top:.75rem;">Search by name</button>
+    </div>
+
+    <p class="aw-error" id="aw-lookup-error" style="display:none;"></p>
+    <p class="aw-success" id="aw-lookup-success" style="display:none;">
+      Invite found! You can now complete your RSVP.<br>
+      <strong>Guests allowed:</strong> <span id="aw-gate-max">0</span>
+    </p>
+    <div id="aw-lookup-multiple" style="display:none; margin-top:1rem;"></div>
+  </section>
+
+  <!-- Step 2: RSVP Form (hidden until lookup succeeds) -->
+  <div id="aw-rsvp-app" style="display:none;">
+
+    <section class="aw-card">
+      <h2 class="aw-h2">Event(s)</h2>
+      <p class="aw-muted">Select the event(s) you will attend.</p>
+      <div class="aw-events" id="aw-events"></div>
+    </section>
+
+    <section class="aw-card">
+      <div class="aw-row" style="margin-top:0;">
+        <h2 class="aw-h2" style="margin:0;">Guests</h2>
+        <span class="aw-spacer"></span>
+        <span class="aw-muted">Added: <span id="aw-count-2">0</span>/<span id="aw-max-2">2</span></span>
+      </div>
+      <div id="aw-guests"></div>
+      <div class="aw-row">
+        <button type="button" class="aw-btn" id="aw-add-guest">Add guest</button>
+        <button type="button" class="aw-btn aw-btn-muted" id="aw-clear-guests">Clear all</button>
+      </div>
+    </section>
+
+    <section class="aw-card">
+      <h2 class="aw-h2">Contact</h2>
+      <div class="aw-grid2">
+        <label class="aw-field">
+          <span>Email</span>
+          <input type="email" id="aw-email" placeholder="you@example.com">
+        </label>
+        <label class="aw-field">
+          <span>Phone (optional)</span>
+          <input type="text" id="aw-phone" placeholder="(###) ###-####">
+        </label>
+      </div>
+      <label class="aw-field" style="margin-top:10px;">
+        <span>Notes (optional)</span>
+        <textarea id="aw-notes" rows="3" placeholder="Allergies, accessibility needs, anything we should know?"></textarea>
+      </label>
+      <input type="text" id="aw-hp" style="display:none;" tabindex="-1" autocomplete="off">
+    </section>
+
+    <section class="aw-card">
+      <h2 class="aw-h2">Review &amp; submit</h2>
+      <div id="aw-summary" class="aw-summary"></div>
+      <div class="aw-row" style="margin-top:12px;">
+        <button type="button" class="aw-btn" id="aw-preview">Refresh summary</button>
+        <span class="aw-spacer"></span>
+        <button type="button" class="aw-btn aw-btn-primary" id="aw-submit">Submit RSVP</button>
+      </div>
+      <p class="aw-hint">Stored on this site. You'll also receive a copy by email.</p>
+      <p class="aw-success" id="aw-success" hidden>🎉 Thank you! Your RSVP was received.</p>
+      <p class="aw-error" id="aw-error" hidden>There's an issue with your RSVP. Please check required fields.</p>
+    </section>
+
+  </div>
+
+  <div style="text-align:center; margin:40px 0 20px;">
+    <a href="/" class="back-arrow">&#9664;&#9664; Back to Home</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+window.AW_RSVP_CONF = {
+  restUrl: "{% url 'wedding:rsvp_submit' %}",
+  lookupUrl: "{% url 'wedding:rsvp_lookup' %}",
+  events: ["Ceremony", "Reception"],
+  household: "Your household",
+  maxGuests: 2,
+  notify: "bermeawedding@outlook.com",
+  secret: "{{ rsvp_secret }}",
+  lookupMode: "hybrid"
+};
+</script>
+{% endblock %}

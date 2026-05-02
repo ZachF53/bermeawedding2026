@@ -1,0 +1,97 @@
+# =====================================================================
+# Brian & Aisha Wedding — Django site
+# =====================================================================
+
+# ---------- Python & Django ------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+*$py.class
+*.so
+.Python
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# ---------- Environment & secrets ------------------------------------
+.env
+.env.local
+.env.production
+.env.*.local
+*.env
+# .env.example IS committed — it's the template
+!.env.example
+
+# ---------- Virtual environments -------------------------------------
+venv/
+env/
+ENV/
+.venv/
+virtualenv/
+
+# ---------- Static & media -------------------------------------------
+# Django collectstatic output (generated, never commit)
+staticfiles/
+collected_static/
+# Project-root /static/ (we use wedding/static/ instead)
+/static/
+# wedding/static/ IS committed — those are source files / images / css / js
+# Drop binary uploads from /media/ but keep folder placeholders
+media/*.jpg
+media/*.jpeg
+media/*.png
+media/*.gif
+media/*.webp
+media/*.svg
+media/*.pdf
+media/*.zip
+!media/.gitkeep
+!media/accommodations/.gitkeep
+!media/couple/.gitkeep
+!media/events/.gitkeep
+!media/faq/.gitkeep
+!media/story/.gitkeep
+
+# ---------- OS files -------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ---------- IDE & editors --------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+.cursor/
+
+# ---------- DigitalOcean & deployment --------------------------------
+.do/app.yaml.local
+*.pem
+*.key
+Procfile.local
+
+# ---------- Python packaging -----------------------------------------
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# ---------- Testing & coverage ---------------------------------------
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# ---------- Jupyter --------------------------------------------------
+.ipynb_checkpoints/

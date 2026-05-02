@@ -1,0 +1,142 @@
+{% extends 'wedding/base.html' %}
+{% load static %}
+{% block title %}Brian &amp; Aisha Wedding — Come Celebrate With Us!{% endblock %}
+{% block content %}
+
+<!-- ENVELOPE SECTION (shown on first visit) -->
+<div id="envelope-section" style="min-height:100vh; background-color:#1a2340; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 20px;">
+  <h3 style="color:#ffffff; font-family:'Dancing Script',handwriting; font-size:2rem; margin-bottom:8px;">Brian &amp; Aisha Wedding</h3>
+  <div style="display:flex; align-items:center; gap:12px; color:#ffffff; font-size:22px; margin-bottom:32px; justify-content:center;">
+    <span style="flex:1; height:1px; background:rgba(255,255,255,0.4); max-width:80px; display:inline-block;"></span>
+    05 SEP 2026
+    <span style="flex:1; height:1px; background:rgba(255,255,255,0.4); max-width:80px; display:inline-block;"></span>
+  </div>
+  <h2 style="color:#ffffff; font-family:'Dancing Script',handwriting; font-size:2.5rem; margin-bottom:24px;">You're Invited!</h2>
+  <img src="{% static 'wedding/images/home/closed-no-bg.png' %}"
+       id="envelope-img"
+       alt="Click to open your invitation"
+       style="cursor:pointer; max-width:600px; width:90vw; transition:transform 0.2s ease;"
+       onmouseover="this.style.transform='scale(1.02)'"
+       onmouseout="this.style.transform='scale(1)'">
+  <h3 style="color:rgba(255,255,255,0.85); font-family:'Dancing Script',handwriting; font-size:1.4rem; margin-top:24px;">Click on the envelope to open your invitation</h3>
+</div>
+
+<!-- HOME CONTENT (hidden until envelope opened) -->
+<div id="home-content" style="display:none; opacity:0;">
+
+  <!-- HERO -->
+  <div style="min-height:100vh; background-image:url('{% static 'wedding/images/home/wedding-1-scaled.jpg' %}'); background-size:cover; background-position:center; position:relative; display:flex; align-items:center; justify-content:center;">
+    <div style="position:absolute; inset:0; background:rgba(0,0,0,0.24);"></div>
+    <div style="position:relative; z-index:1; text-align:center; padding:20px;">
+      <h3 style="color:#ffffff; font-family:'Dancing Script',handwriting; font-size:2.5rem; margin-bottom:16px;">Brian &amp; Aisha Wedding</h3>
+      <div style="display:flex; align-items:center; gap:12px; justify-content:center; color:#ffffff; font-size:22px; font-family:'Lora',serif;">
+        <span style="width:60px; height:1px; background:rgba(255,255,255,0.6); display:inline-block;"></span>
+        05 SEP 2026
+        <span style="width:60px; height:1px; background:rgba(255,255,255,0.6); display:inline-block;"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- OUR STORY -->
+  <div style="background:#ffffff; padding:60px 20px; text-align:center;">
+    <div style="max-width:800px; margin:0 auto;">
+      <h1 style="font-family:'Dancing Script',handwriting; color:#3a3a3a; margin-bottom:24px;">Our Story</h1>
+      <p style="font-family:'Lora',serif; font-size:1rem; line-height:1.7; color:#4b4f58; margin-bottom:16px;">Like many modern love stories, ours began with a swipe—on Hinge, of all places. What started as hopeful curiosity quickly turned into something unforgettable.</p>
+      <p style="font-family:'Lora',serif; font-size:1rem; line-height:1.7; color:#4b4f58; margin-bottom:24px;">By our second date, we found ourselves at a coffee shop, completely lost in conversation—and in a 1,000-piece puzzle. Hours slipped by as we talked about life, family, dreams, and everything in between. We didn't notice the time until the staff gently let us know they were closing for the day. By then, we knew we'd found something rare. Something real…</p>
+      <a href="/our-story/" style="display:inline-block; background-color:#dba367; color:#fff; font-family:Helvetica,sans-serif; font-weight:600; font-size:16px; padding:10px 36px; border-radius:40px; text-decoration:none; box-shadow:0 2px 6px rgba(0,0,0,0.1); transition:background-color 0.3s ease;">Click Here To Read More…</a>
+    </div>
+  </div>
+
+  <!-- GOLD DIVIDER -->
+  <div style="padding:0 20px;"><hr style="border:none; border-top:1px solid #dba367; width:75%; margin:0 auto;"></div>
+
+  <!-- NAV CARDS -->
+  <div style="background:#ffffff; padding:50px 20px;">
+    <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:24px; max-width:900px; margin:0 auto;">
+      <div style="text-align:center; padding:30px 20px;">
+        <h2 style="font-family:'Dancing Script',handwriting; color:#3a3a3a; margin-bottom:20px;">Events</h2>
+        <a href="/events/" style="display:inline-block; background:#dba367; color:#fff; border-radius:100px; padding:15px 45px; font-family:'Lora',serif; text-decoration:none; line-height:1em; transition:background 0.2s;">View Events</a>
+      </div>
+      <div style="text-align:center; padding:30px 20px;">
+        <h2 style="font-family:'Dancing Script',handwriting; color:#3a3a3a; margin-bottom:20px;">RSVP</h2>
+        <a href="/rsvp/" style="display:inline-block; background:#dba367; color:#fff; border-radius:100px; padding:15px 45px; font-family:'Lora',serif; text-decoration:none; line-height:1em; transition:background 0.2s;">RSVP Today</a>
+      </div>
+      <div style="text-align:center; padding:30px 20px;">
+        <h2 style="font-family:'Dancing Script',handwriting; color:#3a3a3a; margin-bottom:20px;">Accommodations</h2>
+        <a href="/accommodations/" style="display:inline-block; background:#dba367; color:#fff; border-radius:100px; padding:15px 45px; font-family:'Lora',serif; text-decoration:none; line-height:1em; transition:background 0.2s;">View Accommodations</a>
+      </div>
+      <div style="text-align:center; padding:30px 20px;">
+        <h2 style="font-family:'Dancing Script',handwriting; color:#3a3a3a; margin-bottom:20px;">FAQs</h2>
+        <a href="/faq/" style="display:inline-block; background:#dba367; color:#fff; border-radius:100px; padding:15px 45px; font-family:'Lora',serif; text-decoration:none; line-height:1em; transition:background 0.2s;">View FAQs</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- GOLD DIVIDER -->
+  <div style="padding:0 20px;"><hr style="border:none; border-top:1px solid #dba367; width:75%; margin:0 auto;"></div>
+
+  <!-- THE HAPPY COUPLE -->
+  <div style="background:#ffffff; padding:50px 20px; text-align:center;">
+    <h2 style="font-family:'Dancing Script',handwriting; color:#dba367; margin-bottom:30px;">The Happy Couple</h2>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:15px; max-width:1100px; margin:0 auto; padding:0 15px;">
+      <img src="{% static 'wedding/images/couple/wedding-4-scaled.jpg' %}" alt="Brian and Aisha" style="width:100%; border-radius:20px; display:block; object-fit:cover; aspect-ratio:3/4;">
+      <img src="{% static 'wedding/images/couple/Couple-Photo-2.png' %}" alt="Brian and Aisha" style="width:100%; border-radius:20px; display:block; object-fit:cover; aspect-ratio:3/4;">
+      <img src="{% static 'wedding/images/couple/wedding-6-scaled.jpg' %}" alt="Brian and Aisha" style="width:100%; border-radius:20px; display:block; object-fit:cover; aspect-ratio:3/4;">
+      <img src="{% static 'wedding/images/couple/wedding-2-scaled.jpg' %}" alt="Brian and Aisha" style="width:100%; border-radius:20px; display:block; object-fit:cover; aspect-ratio:3/4;">
+      <img src="{% static 'wedding/images/couple/wedding3-scaled.jpg' %}" alt="Brian and Aisha" style="width:100%; border-radius:20px; display:block; object-fit:cover; aspect-ratio:3/4;">
+      <img src="{% static 'wedding/images/couple/wedding-5-scaled.jpg' %}" alt="Brian and Aisha" style="width:100%; border-radius:20px; display:block; object-fit:cover; aspect-ratio:3/4;">
+    </div>
+  </div>
+
+  <!-- GOLD DIVIDER -->
+  <div style="padding:0 20px;"><hr style="border:none; border-top:1px solid #dba367; width:75%; margin:0 auto;"></div>
+
+  <!-- QUOTE -->
+  <div style="background:#ffffff; padding:50px 20px;">
+    <div style="border:1px solid #dba367; max-width:800px; margin:0 auto; padding:30px 60px; display:flex; align-items:center; gap:20px; flex-wrap:nowrap;">
+      <svg viewBox="0 0 512 512" width="48" height="48" style="fill:#dba367; flex-shrink:0;"><path d="M464 256h-80v-64c0-35.3 28.7-64 64-64h8c13.3 0 24-10.7 24-24V56c0-13.3-10.7-24-24-24h-8c-88.4 0-160 71.6-160 160v240c0 26.5 21.5 48 48 48h128c26.5 0 48-21.5 48-48V304c0-26.5-21.5-48-48-48zm-288 0H96v-64c0-35.3 28.7-64 64-64h8c13.3 0 24-10.7 24-24V56c0-13.3-10.7-24-24-24h-8C71.6 32 0 103.6 0 192v240c0 26.5 21.5 48 48 48h128c26.5 0 48-21.5 48-48V304c0-26.5-21.5-48-48-48z"/></svg>
+      <div style="text-align:center; flex:1;">
+        <h3 style="font-family:'Dancing Script',handwriting; color:#3a3a3a; font-size:1.8rem; margin-bottom:12px;">"Forever is composed of nows"</h3>
+        <p style="font-family:'Lora',serif; text-transform:uppercase; letter-spacing:4px; font-size:0.85rem; color:#3a3a3a; margin:0;">Emily Dickinson</p>
+      </div>
+      <svg viewBox="0 0 512 512" width="48" height="48" style="fill:#dba367; flex-shrink:0;"><path d="M464 32H336c-26.5 0-48 21.5-48 48v128c0 26.5 21.5 48 48 48h80v64c0 35.3-28.7 64-64 64h-8c-13.3 0-24 10.7-24 24v48c0 13.3 10.7 24 24 24h8c88.4 0 160-71.6 160-160V80c0-26.5-21.5-48-48-48zm-288 0H48C21.5 32 0 53.5 0 80v128c0 26.5 21.5 48 48 48h80v64c0 35.3-28.7 64-64 64h-8c-13.3 0-24 10.7-24 24v48c0 13.3 10.7 24 24 24h8c88.4 0 160-71.6 160-160V80c0-26.5-21.5-48-48-48z"/></svg>
+    </div>
+  </div>
+
+  <!-- CLOSE ENVELOPE BUTTON -->
+  <div style="background:#ffffff; padding:60px 20px; text-align:center;">
+    <p style="font-family:'Dancing Script',handwriting; font-size:1.2rem; color:#3a3a3a; margin-bottom:20px;">Click the envelope to close your invitation</p>
+    <img src="{% static 'wedding/images/home/open-no-bg.png' %}"
+         id="envelope-close-btn"
+         alt="Close invitation"
+         style="cursor:pointer; max-width:500px; width:80vw; display:inline-block; transition:transform 0.2s ease;"
+         onmouseover="this.style.transform='scale(1.02)'"
+         onmouseout="this.style.transform='scale(1)'">
+  </div>
+
+</div><!-- end home-content -->
+
+<!-- RESPONSIVE GALLERY CSS -->
+<style>
+@media (max-width: 768px) {
+  #home-content div[style*="grid-template-columns:repeat(3,1fr)"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+@media (max-width: 480px) {
+  #home-content div[style*="grid-template-columns:repeat(3,1fr)"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+@media (max-width: 600px) {
+  #home-content div[style*="grid-template-columns:repeat(2,1fr)"] {
+    grid-template-columns: 1fr !important;
+  }
+  #home-content div[style*="padding:30px 60px"] {
+    padding: 24px 16px !important;
+    flex-direction: column !important;
+  }
+}
+</style>
+
+{% endblock %}

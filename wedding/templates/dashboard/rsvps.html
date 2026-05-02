@@ -1,0 +1,47 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}RSVPs — B&amp;A Admin{% endblock %}
+{% block content %}
+
+<h1 class="page-title">RSVPs ({{ total }})</h1>
+
+<form method="get" class="filter-bar">
+  <input class="search-input" type="text" name="search" value="{{ search }}" placeholder="Search by guest name or email…">
+  <button type="submit" class="btn-outline btn-sm">Search</button>
+</form>
+
+{% if rsvps %}
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th>Events</th>
+      <th>Guests</th>
+      <th>Submitted</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rsvps %}
+      <tr>
+        <td class="name-cell">{{ r.invited_guest.first_name }} {{ r.invited_guest.last_name }}</td>
+        <td>{{ r.email|default:"—" }}</td>
+        <td>{{ r.phone|default:"—" }}</td>
+        <td>
+          {% for e in r.event_selections.all %}{{ e.event_name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
+        </td>
+        <td>{{ r.guests.count }}</td>
+        <td>{{ r.submitted_at|date:"M j, Y g:i A" }}</td>
+        <td class="actions-cell">
+          <a href="{% url 'wedding:dashboard_rsvp_detail' r.pk %}" class="btn-gold btn-sm">View</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty-state">No RSVPs yet{% if search %} for "{{ search }}"{% endif %}.</p>
+{% endif %}
+
+{% endblock %}

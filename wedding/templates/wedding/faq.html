@@ -1,0 +1,183 @@
+{% extends 'wedding/base.html' %}
+{% load static %}
+{% block title %}FAQ — Brian &amp; Aisha Wedding{% endblock %}
+{% block content %}
+<div style="background-image:url('{% static 'wedding/images/faq/h1-background-img-5-1.jpg' %}'); background-size:auto; min-height:100vh; padding:60px 0 0;">
+  <div style="max-width:80%; margin:0 auto;">
+
+    <h2 style="font-family:'Dancing Script',handwriting; text-align:center; color:#3a3a3a; margin-bottom:8px;">Brian &amp; Aisha Wedding FAQs</h2>
+    <p style="text-align:center; font-family:'Lora',serif; color:#666; margin-bottom:24px;">Everything you need to know for the big day</p>
+
+    <nav class="aw-pills" aria-label="FAQ sections">
+      <a class="aw-pill" href="#rsvp-kids-plus-ones">RSVP, Kids &amp; Plus Ones</a>
+      <a class="aw-pill" href="#event-details">Event Details</a>
+      <a class="aw-pill" href="#travel-parking">Travel &amp; Parking</a>
+      <a class="aw-pill" href="#registry-gifts">Registry &amp; Gifts</a>
+      <a class="aw-pill" href="#food-drinks">Food &amp; Drinks</a>
+      <a class="aw-pill" href="#photos-social">Photography &amp; Social Media</a>
+    </nav>
+
+    <section class="aw-faq-section" id="rsvp-kids-plus-ones">
+      <h3>RSVP, Kids &amp; Plus Ones</h3>
+
+      <details class="aw-accordion">
+        <summary>When should I RSVP by?</summary>
+        <div class="answer"><p>Please RSVP by <strong>July 24, 2026</strong> so we can finalize seating and catering counts.</p></div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>How do I RSVP?</summary>
+        <div class="answer"><p>Use the <a href="{% url 'wedding:rsvp' %}">RSVP page</a>. Look up your invite by email or by name, then complete the form for everyone in your party.</p></div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>Can I bring a plus-one?</summary>
+        <div class="answer"><p>Plus-ones are listed by name on your invitation. Your RSVP will show how many guests your invitation covers — please RSVP for that number or fewer.</p></div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>Are kids welcome?</summary>
+        <div class="answer"><p>We love your kids — but we've chosen to keep our wedding an adults-only celebration unless your children are listed by name on your invitation.</p></div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>What if my plans change after I RSVP?</summary>
+        <div class="answer"><p>Just send us a note as soon as you know. The earlier the better, especially after the RSVP deadline.</p></div>
+      </details>
+    </section>
+
+    <section class="aw-faq-section" id="event-details">
+      <h3>Event Details</h3>
+
+      <details class="aw-accordion">
+        <summary>When and where is the wedding?</summary>
+        <div class="answer"><p>Saturday, September 5, 2026, at <strong>The Skyline</strong>, 707 Dawson St, San Antonio, TX 78202. Ceremony begins at 5:30 PM.</p></div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>What time should I arrive?</summary>
+        <div class="answer"><p>Please plan to be seated at least 15 minutes before the ceremony start time.</p></div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>What's the dress code?</summary>
+        <div class="answer">
+          <p>Cocktail attire. Please leave the jeans and sneakers at home — but comfortable shoes for the dance floor are very welcome.</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px;">
+            <img src="{% static 'wedding/images/faq/cocktail-men.webp' %}" alt="Cocktail attire — men" style="width:100%; border-radius:8px; display:block;">
+            <img src="{% static 'wedding/images/faq/cocktail-women.webp' %}" alt="Cocktail attire — women" style="width:100%; border-radius:8px; display:block;">
+          </div>
+        </div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>Is the ceremony indoors or outdoors?</summary>
+        <div class="answer"><p>Both portions of the day will primarily be indoors with some open-air areas for cocktails. We'll keep an eye on the September Texas weather and send updates as needed.</p></div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>How long will the reception last?</summary>
+        <div class="answer"><p>Reception runs until 11:00 PM. We hope you'll dance with us all night.</p></div>
+      </details>
+    </section>
+
+    <section class="aw-faq-section" id="travel-parking">
+      <h3>Travel &amp; Parking</h3>
+
+      <details class="aw-accordion">
+        <summary>What airport should I fly into?</summary>
+        <div class="answer"><p>San Antonio International (SAT) is closest — about 15 minutes from the venue.</p></div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>Is there a hotel block?</summary>
+        <div class="answer"><p>Yes — see the <a href="{% url 'wedding:accommodations' %}">Accommodations</a> page for booking details and deadlines.</p></div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>Where do I park?</summary>
+        <div class="answer">
+          <p>On-site and street parking are both available near the venue. Use the map below to plan your route from a nearby restaurant we recommend.</p>
+          <img src="{% static 'wedding/images/faq/Map-from-Pastiche.jpeg' %}" alt="Walking map from Pastiche to The Skyline">
+        </div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>Do you recommend Uber/Lyft or driving?</summary>
+        <div class="answer"><p>Either works. If you plan to enjoy a few drinks (please do!), rideshare is the easy choice.</p></div>
+      </details>
+    </section>
+
+    <section class="aw-faq-section" id="registry-gifts">
+      <h3>Registry &amp; Gifts</h3>
+
+      <details class="aw-accordion">
+        <summary>Are you registered anywhere?</summary>
+        <div class="answer">
+          <p>Your presence is the gift we're hoping for. If you'd like to give something, we have a registry on MyRegistry:</p>
+          <p><a class="aw-chip" href="https://www.myregistry.com/" target="_blank" rel="noopener">View Registry</a></p>
+        </div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>Can I send a monetary gift?</summary>
+        <div class="answer">
+          <p>Yes, and thank you! You can send via:</p>
+          <div class="pay-row">
+            <span class="aw-chip">Zelle: aisha-denis@outlook.com</span>
+            <span class="aw-chip">Venmo: @BermeaWedding2026</span>
+            <span class="aw-chip">CashApp: $BermeaWedding2026</span>
+          </div>
+        </div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>Should I bring my gift to the wedding?</summary>
+        <div class="answer"><p>You're welcome to, but not required. Online or shipped gifts work just as well.</p></div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>Where can I have a gift shipped?</summary>
+        <div class="answer"><p>Please send any shipped gifts to the address listed on the registry page so we can track them properly.</p></div>
+      </details>
+    </section>
+
+    <section class="aw-faq-section" id="food-drinks">
+      <h3>Food &amp; Drinks</h3>
+
+      <details class="aw-accordion">
+        <summary>What kind of food will be served?</summary>
+        <div class="answer"><p>A plated dinner with a Texas twist, plus passed appetizers during cocktail hour.</p></div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>Will dietary needs be accommodated?</summary>
+        <div class="answer"><p>Yes — let us know on your RSVP and we'll make sure the catering team knows.</p></div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>Is there an open bar?</summary>
+        <div class="answer"><p>Yes, beer, wine, and a curated cocktail menu will be available throughout the reception.</p></div>
+      </details>
+    </section>
+
+    <section class="aw-faq-section" id="photos-social">
+      <h3>Photography &amp; Social Media</h3>
+
+      <details class="aw-accordion">
+        <summary>Is there a wedding hashtag?</summary>
+        <div class="answer"><p>Yes! Tag your photos <strong>#BermeaEverAfter</strong> so we can find them later.</p></div>
+      </details>
+
+      <details class="aw-accordion">
+        <summary>Can I take photos during the ceremony?</summary>
+        <div class="answer"><p>We're having an unplugged ceremony — please leave the phones in your bag for those moments. Snap freely during cocktail hour and the reception.</p></div>
+      </details>
+    </section>
+
+    <div style="text-align:center; margin:40px 0 60px;">
+      <a href="/" class="back-arrow">&#9664;&#9664; Back to Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

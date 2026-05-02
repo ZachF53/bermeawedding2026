@@ -1,0 +1,113 @@
+{% extends 'wedding/base.html' %}
+{% load static %}
+{% block title %}Accommodations — Brian &amp; Aisha Wedding{% endblock %}
+{% block extra_head %}
+<style>
+@media (min-width:1025px) { .accommodations-bg { background-attachment: fixed !important; } }
+</style>
+{% endblock %}
+{% block content %}
+<div class="accommodations-bg" style="background-image:url('{% static 'wedding/images/accommodations/flower-4.png' %}'); background-repeat:no-repeat; background-size:cover; min-height:100vh; padding:60px 0;">
+  <div style="max-width:80%; margin:0 auto;">
+
+    <h2 style="font-family:'Dancing Script',handwriting; text-align:center; color:#3a3a3a; margin-bottom:8px;">Brian &amp; Aisha Wedding</h2>
+
+    <div class="aw-visit">
+      <p class="lede">We've reserved room blocks at two hotels nearby. Both blocks are
+      released after their booking deadline, so please book early.</p>
+
+      <h3>Hotel Room Blocks</h3>
+      <div class="aw-grid">
+
+        <div class="aw-card">
+          <span class="deadline">Book by August 4, 2026</span>
+          <h4>Hampton Inn &amp; Suites — Downtown San Antonio</h4>
+          <p class="meta">A short ride to the venue, full breakfast included.</p>
+          <a class="aw-btn" target="_blank" rel="noopener"
+             href="https://www.hilton.com/en/book/reservation/deeplink/?ctyhocn=SATDTHX&amp;groupCode=CHH914&amp;arrivaldate=2026-09-04&amp;departuredate=2026-09-06&amp;cid=OM,WW,HILTONLINK,EN,DirectLink&amp;fromId=HILTONLINKDIRECT">
+            Book Hampton Inn
+          </a>
+        </div>
+
+        <div class="aw-card">
+          <span class="deadline">Book by August 4, 2026</span>
+          <h4>San Antonio Marriott Rivercenter</h4>
+          <p class="meta">On the Riverwalk, walking distance to dining and downtown.</p>
+          <a class="aw-btn" target="_blank" rel="noopener"
+             href="https://book.passkey.com/go/DenisBermeaWed">
+            Book Marriott Rivercenter
+          </a>
+        </div>
+
+      </div>
+
+      <h3 style="margin-top:60px;">Things To Do in San Antonio</h3>
+      <div class="aw-activity-grid">
+
+        <div class="aw-activity">
+          <h4><span class="icon">🎢</span> Theme Parks</h4>
+          <p>Family-friendly thrills just outside the city.</p>
+          <div class="chips">
+            <a class="aw-chip" href="https://seaworld.com/san-antonio/" target="_blank" rel="noopener">SeaWorld</a>
+            <a class="aw-chip" href="https://www.sixflags.com/fiestatexas" target="_blank" rel="noopener">Six Flags Fiesta Texas</a>
+            <a class="aw-chip" href="https://www.schlitterbahn.com/new-braunfels" target="_blank" rel="noopener">Schlitterbahn</a>
+          </div>
+        </div>
+
+        <div class="aw-activity">
+          <h4><span class="icon">🛍️</span> Shopping &amp; Dining</h4>
+          <p>From luxury boutiques to a working brewery food hall.</p>
+          <div class="chips">
+            <a class="aw-chip" href="https://theshopsatlacantera.com/" target="_blank" rel="noopener">The Shops at La Cantera</a>
+            <a class="aw-chip" href="https://atpearl.com/" target="_blank" rel="noopener">The Pearl</a>
+            <a class="aw-chip" href="https://www.quarrymarket.com/" target="_blank" rel="noopener">The Quarry Market</a>
+          </div>
+        </div>
+
+        <div class="aw-activity">
+          <h4><span class="icon">🌳</span> Parks &amp; Walks</h4>
+          <p>Open spaces in the heart of downtown.</p>
+          <div class="chips">
+            <a class="aw-chip" href="https://hemisfair.org/" target="_blank" rel="noopener">Hemisfair</a>
+            <a class="aw-chip" href="https://www.thesanantonioriverwalk.com/" target="_blank" rel="noopener">The Riverwalk</a>
+          </div>
+        </div>
+
+        <div class="aw-activity">
+          <h4><span class="icon">🎨</span> Art &amp; Day Trips</h4>
+          <p>A short drive expands the options dramatically.</p>
+          <div class="chips">
+            <a class="aw-chip" href="https://www.bluestarartscomplex.com/" target="_blank" rel="noopener">Blue Star Arts Complex</a>
+            <a class="aw-chip" href="https://www.visitfredericksburgtx.com/" target="_blank" rel="noopener">Fredericksburg</a>
+            <a class="aw-chip" href="https://www.visitsanantonio.com/" target="_blank" rel="noopener">VisitSanAntonio</a>
+          </div>
+        </div>
+
+      </div>
+
+      <h3 style="margin-top:60px;">Getting Around</h3>
+      <div class="aw-transport-grid">
+        <div class="aw-transport-card">
+          <div class="icon">🚗</div>
+          <h5>Uber</h5>
+          <p>Reliable across the city — surge can spike on weekends.</p>
+        </div>
+        <div class="aw-transport-card">
+          <div class="icon">🚙</div>
+          <h5>Lyft</h5>
+          <p>Equally available; check both apps for the best price.</p>
+        </div>
+        <div class="aw-transport-card">
+          <div class="icon">🔑</div>
+          <h5>Rental Cars</h5>
+          <p>Easy at SAT airport. Worth it for day trips and theme parks.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:50px;">
+      <a href="/" class="back-arrow">&#9664;&#9664; Back to Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Guest List — B&amp;A Admin{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1 class="page-title">Guest List ({{ total }})</h1>
+  <div>
+    <a href="{% url 'wedding:dashboard_guest_add' %}" class="btn-gold">+ Add Guest</a>
+    <a href="{% url 'wedding:dashboard_import' %}" class="btn-outline">📥 Import Excel/CSV</a>
+  </div>
+</div>
+
+<form method="get" class="filter-bar">
+  <input class="search-input" type="text" name="search" value="{{ search }}" placeholder="Search by name or email…">
+  <a href="?" class="btn-pill {% if not rsvped_filter %}active{% endif %}">All</a>
+  <a href="?rsvped=yes" class="btn-pill {% if rsvped_filter == 'yes' %}active{% endif %}">RSVPed</a>
+  <a href="?rsvped=no" class="btn-pill {% if rsvped_filter == 'no' %}active{% endif %}">Not RSVPed</a>
+  <button type="submit" class="btn-outline btn-sm">Search</button>
+</form>
+
+{% if guests %}
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Partner</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th>Max Guests</th>
+      <th>RSVPed</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for g in guests %}
+      <tr>
+        <td class="name-cell">{{ g.first_name }} {{ g.last_name }}</td>
+        <td>{{ g.partner_name|default:"—" }}</td>
+        <td>{{ g.email|default:"—" }}</td>
+        <td>{{ g.phone|default:"—" }}</td>
+        <td>{{ g.max_guests }}</td>
+        <td>
+          {% if g.rsvped %}
+            <span class="badge-green">✓ Yes</span>
+          {% else %}
+            <span class="badge-gray">—</span>
+          {% endif %}
+        </td>
+        <td class="actions-cell">
+          <a href="{% url 'wedding:dashboard_guest_edit' g.pk %}" class="btn-gold btn-sm">Edit</a>
+          <form method="post" action="{% url 'wedding:dashboard_guest_delete' g.pk %}"
+                onsubmit="return confirm('Delete {{ g.first_name }} {{ g.last_name }}? Their RSVP submission will also be deleted.');">
+            {% csrf_token %}
+            <button type="submit" class="btn-red btn-sm">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty-state">No guests found{% if search or rsvped_filter %} for the current filter{% endif %}.</p>
+{% endif %}
+
+{% endblock %}

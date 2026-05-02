@@ -1,0 +1,39 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Dashboard — B&amp;A Admin{% endblock %}
+{% block content %}
+
+<h1 class="page-title">Dashboard</h1>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <span class="num">{{ invited_total }}</span>
+    <span class="lbl">Total Invited</span>
+  </div>
+  <div class="stat-card">
+    <span class="num">{{ households }}</span>
+    <span class="lbl">Households</span>
+  </div>
+  <div class="stat-card">
+    <span class="num">{{ rsvped }}</span>
+    <span class="lbl">RSVPed</span>
+  </div>
+  <div class="stat-card">
+    <span class="num">{{ attending }}</span>
+    <span class="lbl">Attending</span>
+  </div>
+  <div class="stat-card">
+    <span class="num">{{ not_responded }}</span>
+    <span class="lbl">Not Responded</span>
+  </div>
+  <div class="stat-card">
+    <span class="num" style="font-size:1.6rem; line-height:1.4;">{{ rsvp_deadline }}</span>
+    <span class="lbl">RSVP Deadline</span>
+  </div>
+</div>
+
+<div class="action-row">
+  <a href="{% url 'wedding:dashboard_guests' %}" class="btn-gold">View All Guests</a>
+  <a href="{% url 'wedding:dashboard_rsvps' %}" class="btn-outline">View RSVPs</a>
+</div>
+
+{% endblock %}

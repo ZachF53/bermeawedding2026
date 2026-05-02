@@ -1,0 +1,66 @@
+{% extends 'wedding/base.html' %}
+{% load static %}
+{% block title %}Events — Brian &amp; Aisha Wedding{% endblock %}
+{% block extra_head %}
+<style>
+@media (min-width:1025px) { .events-bg { background-attachment: fixed !important; } }
+</style>
+{% endblock %}
+{% block content %}
+<div class="events-bg" style="background-image:url('{% static 'wedding/images/events/flower-icon-02.png' %}'); background-position:center center; background-repeat:no-repeat; background-size:auto; min-height:100vh; padding:60px 0;">
+  <div style="max-width:80%; margin:0 auto;">
+    <h2 style="font-family:'Dancing Script',handwriting; text-align:center; color:#3a3a3a; margin-bottom:8px;">Brian &amp; Aisha Wedding Events</h2>
+    <p style="text-align:center; color:#dba367; font-family:'Lora',serif; margin-bottom:40px;">By Invite Only</p>
+
+    <!-- TIMELINE -->
+    <div class="aw-timeline">
+      <div class="aw-timeline-line"></div>
+
+      <div class="aw-timeline-container aw-left">
+        <div class="aw-timeline-content">
+          <div class="aw-time">By Invite Only</div>
+          <h2>Bridal Shower</h2>
+          <figure class="aw-media">
+            <img src="{% static 'wedding/images/events/bridal-shower.jpg' %}" alt="Bridal Shower">
+          </figure>
+        </div>
+      </div>
+
+      <div class="aw-timeline-container aw-right">
+        <div class="aw-timeline-content">
+          <div class="aw-time">By Invite Only</div>
+          <h2>Bachelor &amp; Bachelorette Party</h2>
+          <div class="aw-media-grid">
+            <img src="{% static 'wedding/images/events/bach-party-1.jpg' %}" alt="Bachelor Party">
+            <img src="{% static 'wedding/images/events/bach-party-2.jpg' %}" alt="Bachelorette Party">
+          </div>
+        </div>
+      </div>
+
+      <div class="aw-timeline-container aw-left">
+        <div class="aw-timeline-content">
+          <div class="aw-time">September 5th, 2026</div>
+          <div class="aw-time">5:30 PM – 11:00 PM</div>
+          <h2>Wedding Day</h2>
+          <figure class="aw-media">
+            <img src="{% static 'wedding/images/events/wedding-venue.jpg' %}" alt="Wedding Venue">
+            <figcaption>Ceremony &amp; Reception</figcaption>
+          </figure>
+          <div class="aw-meta">
+            <span class="aw-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" fill="currentColor"/></svg>
+            </span>
+            <a class="aw-link" href="https://www.google.com/maps/dir/?api=1&amp;destination=707+Dawson+St,+San+Antonio,+TX+78202" target="_blank" rel="noopener">
+              The Skyline • 707 Dawson St, San Antonio, TX 78202
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:50px;">
+      <a href="/" class="back-arrow">&#9664;&#9664; Back to Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
