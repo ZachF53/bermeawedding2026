@@ -488,6 +488,23 @@ input, textarea, select, button { font-family: 'Lora', serif; }
 .aw-guest-row { display: grid; grid-template-columns: 1fr; gap: 8px; }
 @media (min-width: 600px) { .aw-guest-row { grid-template-columns: 1.1fr 0.9fr; } }
 .aw-guest-events { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+/* Mobile: stack event-pill checkboxes one per line so they can't collide
+   or overflow the pill's border on narrow screens. align-items: flex-start
+   keeps each chip sized to its content rather than stretching full-width. */
+@media (max-width: 599px) {
+  .aw-events,
+  .aw-guest-events {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .aw-rsvp .aw-chip {
+    max-width: 100%;
+    line-height: 1.3;
+  }
+}
+
 .aw-guest-title {
   font-weight: 700;
   margin: 0 0 8px;
