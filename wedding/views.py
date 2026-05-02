@@ -478,13 +478,23 @@ def dashboard_guest_delete(request, pk):
 
 @login_required(login_url=DASHBOARD_LOGIN_URL)
 def dashboard_import(request):
-    context = {'active_page': 'import'}
+    context = {'active_page': 'import', 'results': None}
     if request.method == 'POST':
         upload = request.FILES.get('file')
         if not upload:
             context['error'] = 'Please choose a file to upload.'
         else:
-            context['results'] = _import_guests_file(upload)
+            file_name = (upload.name or '').lower()
+            if not (file_name.endswith('.csv') or file_name.endswith('.xlsx')):
+                context['error'] = 'Unsupported file type. Use .csv or .xlsx.'
+            else:
+                rows, parse_errors = _import_guests_file(upload, file_name)
+                if parse_errors and not rows:
+                    context['error'] = ' | '.join(parse_errors)
+                else:
+                    results = _apply_import_rows(rows)
+                    results['errors'] = list(parse_errors) + results['errors']
+                    context['results'] = results
     return render(request, 'dashboard/import.html', context)
 
 
@@ -526,175 +536,226 @@ def dashboard_rsvp_detail(request, pk):
     })
 
 
+@require_POST
+def dashboard_rsvp_delete(request, pk):
+    if not request.user.is_authenticated:
+        return redirect('wedding:dashboard_login')
+
+    submission = get_object_or_404(RSVPSubmission, pk=pk)
+
+    invited_guest = submission.invited_guest
+
+    # Delete the submission (cascades to RSVPGuest and RSVPEventSelection)
+    submission.delete()
+
+    # Reset the InvitedGuest RSVP status only if no other submissions remain
+    remaining = RSVPSubmission.objects.filter(invited_guest=invited_guest).count()
+    if remaining == 0:
+        invited_guest.rsvped = False
+        invited_guest.current_guests = 0
+        invited_guest.save(update_fields=['rsvped', 'current_guests'])
+
+    messages.success(
+        request,
+        'RSVP for %s %s has been deleted. They can now re-RSVP.' % (
+            invited_guest.first_name, invited_guest.last_name
+        ),
+    )
+    return redirect('wedding:dashboard_rsvps')
+
+
 # ----------------------------- Import helpers -------------------------
 
-_COLUMN_ALIASES = {
-    'first_name':         ['first_name', 'firstname', 'first', 'guest1firstname'],
-    'last_name':          ['last_name', 'lastname', 'last', 'guest1lastname'],
-    'full_name':          ['full_name', 'fullname', 'name', 'guest1name', 'guest_1_name'],
-    'email':              ['email', 'emailaddress', 'guestemail'],
-    'phone':              ['phone', 'phonenumber', 'mobile'],
-    'max_guests':         ['max_guests', 'maxguests', 'totalnumberofguestsinvited',
-                           'totalguests', 'guestcount', 'invited'],
-    'partner_first_name': ['partner_first_name', 'partnerfirstname'],
-    'partner_last_name':  ['partner_last_name', 'partnerlastname'],
-    'partner_full_name':  ['partner_full_name', 'partnerfullname', 'partnername'],
-    'notes':              ['notes', 'note'],
-}
+def _import_guests_file(file_obj, file_name):
+    """Parse an uploaded .csv/.xlsx into a list of normalized row dicts.
+
+    Returns (rows, errors). On unrecoverable parse failure rows is [] and
+    errors is non-empty.
+    """
+    rows = []
+    errors = []
+
+    try:
+        if file_name.endswith('.xlsx'):
+            if openpyxl is None:
+                return [], ['openpyxl is not installed; cannot read .xlsx files.']
+            wb = openpyxl.load_workbook(file_obj, read_only=True, data_only=True)
+
+            # Walk every sheet until we find one with a recognizable header row.
+            for sheet_name in wb.sheetnames:
+                ws = wb[sheet_name]
+                all_rows = list(ws.iter_rows(values_only=True))
+                if not all_rows:
+                    continue
+
+                header_row_idx = None
+                headers = []
+                for i, row in enumerate(all_rows):
+                    row_lower = [str(c).lower().strip() if c else '' for c in row]
+                    if any(x in row_lower for x in ['first_name', 'first name', 'guest 1 name', 'guest1 name']):
+                        header_row_idx = i
+                        headers = row_lower
+                        break
+
+                if header_row_idx is None:
+                    continue
+
+                for row in all_rows[header_row_idx + 1:]:
+                    if not any(row):
+                        continue
+                    cells = [str(c).strip() if c is not None else '' for c in row]
+                    parsed = _parse_row(headers, cells)
+                    if parsed:
+                        rows.append(parsed)
+
+                if rows:
+                    break
+
+        elif file_name.endswith('.csv'):
+            content = file_obj.read()
+            try:
+                text = content.decode('utf-8-sig')
+            except UnicodeDecodeError:
+                text = content.decode('latin-1')
+
+            reader = csv.reader(io.StringIO(text))
+            all_rows = list(reader)
+            if not all_rows:
+                return [], ['Empty CSV file']
+
+            headers = [h.lower().strip() for h in all_rows[0]]
+            for row in all_rows[1:]:
+                if not any((c or '').strip() for c in row):
+                    continue
+                cells = [(c or '').strip() for c in row]
+                parsed = _parse_row(headers, cells)
+                if parsed:
+                    rows.append(parsed)
+        else:
+            return [], ['Unsupported file type. Use .csv or .xlsx.']
+
+    except Exception as e:
+        return [], ['Error reading file: %s' % e]
+
+    return rows, errors
 
 
-def _norm_key(s):
-    return ''.join(c for c in str(s).lower() if c.isalnum() or c == '_')
+def _parse_row(headers, cells):
+    """Map a single row of cells onto our canonical guest dict.
 
-
-def _read_rows(uploaded):
-    name = (uploaded.name or '').lower()
-    if name.endswith('.csv'):
-        text = uploaded.read().decode('utf-8-sig', errors='replace')
-        reader = csv.DictReader(io.StringIO(text))
-        return list(reader), None
-
-    if name.endswith('.xlsx'):
-        if openpyxl is None:
-            return [], 'openpyxl is not installed; cannot read .xlsx files.'
-        try:
-            wb = openpyxl.load_workbook(uploaded, data_only=True, read_only=True)
-        except Exception as e:
-            return [], 'Failed to open workbook: %s' % e
-        ws = wb.active
-        iter_rows = ws.iter_rows(values_only=True)
-        try:
-            headers = ['' if h is None else str(h).strip() for h in next(iter_rows)]
-        except StopIteration:
-            return [], 'Empty file.'
-        rows = []
-        for row in iter_rows:
-            d = {}
+    Header lookup is substring-based and case-insensitive so the same parser
+    handles both compact ("first_name") and human ("Guest 1 Name") sheets.
+    Returns None for rows that have no usable first name.
+    """
+    def get(col_options):
+        for opt in col_options:
             for i, h in enumerate(headers):
-                d[h] = row[i] if i < len(row) else None
-            rows.append(d)
-        return rows, None
-
-    return [], 'Unsupported file type. Use .csv or .xlsx.'
-
-
-def _normalize_import_row(row):
-    by_norm = {}
-    for k, v in row.items():
-        if k is None:
-            continue
-        by_norm[_norm_key(k)] = v if v is not None else ''
-
-    def get(canonical):
-        for alias in _COLUMN_ALIASES.get(canonical, [canonical]):
-            n = _norm_key(alias)
-            if n in by_norm:
-                val = by_norm[n]
-                if val is None:
-                    return ''
-                return str(val).strip()
+                if opt in h and i < len(cells):
+                    val = cells[i].strip()
+                    if val and val.lower() not in ('nan', 'none', 'n/a'):
+                        return val
         return ''
 
-    first_name = get('first_name')
-    last_name  = get('last_name')
-    full_name  = get('full_name')
-    if not first_name and not last_name and full_name:
-        parts = full_name.split(None, 1)
-        first_name = parts[0]
-        last_name = parts[1] if len(parts) > 1 else ''
+    first_name = get(['first_name', 'first name'])
+    last_name  = get(['last_name', 'last name'])
+
     if not first_name and not last_name:
-        return None  # empty row
+        full = get(['guest 1 name', 'guest1 name', 'full_name', 'full name', 'name'])
+        if full:
+            parts = full.strip().split(' ', 1)
+            first_name = parts[0]
+            last_name = parts[1] if len(parts) > 1 else ''
 
-    email = get('email')
-    phone = get('phone')
+    if not first_name:
+        return None
 
-    raw = get('max_guests')
+    max_g_raw = get(['max_guests', 'max guests', 'total number of guests', 'guests'])
     try:
-        max_guests = int(float(raw)) if raw else None
+        max_guests = max(1, int(float(max_g_raw))) if max_g_raw else 2
     except (TypeError, ValueError):
-        max_guests = None
+        max_guests = 2
 
-    partner_full = get('partner_full_name')
+    # Accept either a combined "Partner Name" column or partner_first/_last.
+    partner_full = get(['partner_full_name', 'partner full name', 'partner name'])
     if not partner_full:
-        pf = get('partner_first_name')
-        pl = get('partner_last_name')
+        pf = get(['partner_first', 'partner first'])
+        pl = get(['partner_last', 'partner last'])
         partner_full = (pf + ' ' + pl).strip()
-
-    if max_guests is None:
-        max_guests = 2 if partner_full else 1
 
     return {
         'first_name':   first_name,
         'last_name':    last_name,
-        'email':        email,
-        'phone':        phone,
+        'email':        get(['email', 'email address']),
+        'phone':        get(['phone', 'phone number']),
         'max_guests':   max_guests,
         'partner_name': partner_full,
-        'notes':        get('notes'),
+        'notes':        get(['notes', 'note']),
     }
 
 
-def _apply_import_row(data):
-    existing = None
-    if data.get('email'):
-        existing = InvitedGuest.objects.filter(email__iexact=data['email']).first()
-    if not existing:
-        existing = InvitedGuest.objects.filter(
-            first_name__iexact=data['first_name'],
-            last_name__iexact=data['last_name'],
-        ).first()
-
-    if existing:
-        changed = False
-        if data.get('max_guests') and data['max_guests'] != existing.max_guests:
-            existing.max_guests = data['max_guests']
-            changed = True
-        if data.get('email') and not existing.email:
-            existing.email = data['email']
-            changed = True
-        if data.get('phone') and not existing.phone:
-            existing.phone = data['phone']
-            changed = True
-        if data.get('partner_name') and not existing.partner_name:
-            existing.partner_name = data['partner_name']
-            changed = True
-        if changed:
-            existing.save()
-            return 'updated'
-        return 'skipped'
-
-    InvitedGuest.objects.create(
-        first_name=data['first_name'],
-        last_name=data['last_name'],
-        email=(data.get('email') or None),
-        phone=data.get('phone', ''),
-        partner_name=data.get('partner_name', ''),
-        max_guests=data.get('max_guests', 1) or 1,
-        notes=data.get('notes', ''),
-    )
-    return 'created'
-
-
-def _import_guests_file(uploaded):
+def _apply_import_rows(rows):
+    """Persist parsed rows. Match on email, then first+last name, then first
+    name alone if last name is empty. RSVP state is never touched.
+    """
     results = {'created': 0, 'updated': 0, 'skipped': 0, 'errors': []}
-    rows, err = _read_rows(uploaded)
-    if err:
-        results['errors'].append(err)
-        return results
-    for line_no, row in enumerate(rows, start=2):
+
+    for row in rows:
         try:
-            normalized = _normalize_import_row(row)
+            first = (row.get('first_name') or '').strip()
+            last  = (row.get('last_name') or '').strip()
+            email = (row.get('email') or '').strip()
+            phone = (row.get('phone') or '').strip()
+            partner_name = (row.get('partner_name') or '').strip()
+            max_g = row.get('max_guests') or 1
+
+            if not first:
+                results['skipped'] += 1
+                continue
+
+            existing = None
+            if email:
+                existing = InvitedGuest.objects.filter(email__iexact=email).first()
+            if not existing and last:
+                existing = InvitedGuest.objects.filter(
+                    first_name__iexact=first,
+                    last_name__iexact=last,
+                ).first()
+            if not existing and not last:
+                existing = InvitedGuest.objects.filter(first_name__iexact=first).first()
+
+            if existing:
+                changed = False
+                if max_g and existing.max_guests != max_g:
+                    existing.max_guests = max_g
+                    changed = True
+                if email and not existing.email:
+                    existing.email = email
+                    changed = True
+                if phone and not existing.phone:
+                    existing.phone = phone
+                    changed = True
+                if partner_name and not existing.partner_name:
+                    existing.partner_name = partner_name
+                    changed = True
+                if changed:
+                    existing.save()
+                    results['updated'] += 1
+                else:
+                    results['skipped'] += 1
+            else:
+                InvitedGuest.objects.create(
+                    first_name=first,
+                    last_name=last,
+                    email=(email or None),
+                    phone=phone,
+                    partner_name=partner_name,
+                    max_guests=max_g,
+                    notes=(row.get('notes') or ''),
+                )
+                results['created'] += 1
+
         except Exception as e:
-            results['errors'].append('Row %d: %s' % (line_no, e))
-            continue
-        if not normalized:
-            results['skipped'] += 1
-            continue
-        try:
-            action = _apply_import_row(normalized)
-        except Exception as e:
-            results['errors'].append('Row %d (%s %s): %s' % (
-                line_no, normalized.get('first_name', ''), normalized.get('last_name', ''), e))
-            continue
-        results[action] += 1
+            results['errors'].append('%s %s: %s' % (
+                row.get('first_name', ''), row.get('last_name', ''), e))
+
     return results

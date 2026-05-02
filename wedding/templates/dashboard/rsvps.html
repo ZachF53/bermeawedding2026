@@ -35,6 +35,11 @@
         <td>{{ r.submitted_at|date:"M j, Y g:i A" }}</td>
         <td class="actions-cell">
           <a href="{% url 'wedding:dashboard_rsvp_detail' r.pk %}" class="btn-gold btn-sm">View</a>
+          <form method="post" action="{% url 'wedding:dashboard_rsvp_delete' r.pk %}" style="display:inline;"
+                onsubmit="return confirm('Delete RSVP for {{ r.invited_guest.first_name }} {{ r.invited_guest.last_name }}? This will allow them to re-RSVP.');">
+            {% csrf_token %}
+            <button type="submit" class="btn-red" style="font-size:0.8rem; padding:6px 14px;">Delete</button>
+          </form>
         </td>
       </tr>
     {% endfor %}

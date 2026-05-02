@@ -24,4 +24,5 @@ urlpatterns = [
     path('dashboard/guests/import/',              views.dashboard_import,       name='dashboard_import'),
     path('dashboard/rsvps/',                      views.dashboard_rsvps,        name='dashboard_rsvps'),
     path('dashboard/rsvps/<int:pk>/',             views.dashboard_rsvp_detail,  name='dashboard_rsvp_detail'),
+    path('dashboard/rsvps/<int:pk>/delete/',      views.dashboard_rsvp_delete,  name='dashboard_rsvp_delete'),
 ]

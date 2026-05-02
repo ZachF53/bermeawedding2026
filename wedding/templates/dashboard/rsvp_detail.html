@@ -91,4 +91,16 @@
 </div>
 {% endif %}
 
+<div style="margin-top:40px; padding:20px; border:1px solid #f1d7b9; border-radius:12px; background:#fff8f0;">
+  <h3 style="font-family:'Dancing Script',handwriting; color:#c0392b; margin-bottom:8px;">Danger Zone</h3>
+  <p style="font-family:'Lora',serif; font-size:0.9rem; color:#666; margin-bottom:16px;">
+    Deleting this RSVP will reset the guest's status so they can submit a new RSVP. This cannot be undone.
+  </p>
+  <form method="post" action="{% url 'wedding:dashboard_rsvp_delete' rsvp.pk %}"
+        onsubmit="return confirm('Delete this RSVP? {{ rsvp.invited_guest.first_name }} {{ rsvp.invited_guest.last_name }} will be able to re-RSVP.');">
+    {% csrf_token %}
+    <button type="submit" class="btn-red">Delete This RSVP</button>
+  </form>
+</div>
+
 {% endblock %}

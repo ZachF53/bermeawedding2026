@@ -136,3 +136,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
+
+CSRF_TRUSTED_ORIGINS = [
+    o.strip() for o in os.getenv(
+        'CSRF_TRUSTED_ORIGINS',
+        'https://bermeawedding2026.com,https://www.bermeawedding2026.com,http://24.144.99.254',
+    ).split(',') if o.strip()
+]

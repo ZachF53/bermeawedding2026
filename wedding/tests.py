@@ -1,9 +1,12 @@
 import json
+import os
+import tempfile
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
@@ -453,3 +456,104 @@ class DashboardTests(TestCase):
         r = self.client.get(reverse('wedding:dashboard_logout'))
         self.assertEqual(r.status_code, 302)
         self.assertIn('/dashboard/login/', r['Location'])
+
+    # -- dashboard_rsvp_delete -----------------------------------------
+
+    def _make_submission(self, guest=None):
+        if guest is None:
+            guest = InvitedGuest.objects.create(
+                first_name='Eve', last_name='Adams',
+                email='eve@example.com', max_guests=2,
+                rsvped=True, current_guests=2,
+            )
+        return RSVPSubmission.objects.create(
+            invited_guest=guest, attending=True,
+            email=guest.email or 'eve@example.com', phone='',
+        ), guest
+
+    def test_rsvp_delete_requires_authentication(self):
+        sub, _ = self._make_submission()
+        # Anonymous POST → must redirect to login, not actually delete
+        r = self.client.post(reverse('wedding:dashboard_rsvp_delete', args=[sub.pk]))
+        self.assertEqual(r.status_code, 302)
+        self.assertIn('/dashboard/login/', r['Location'])
+        self.assertTrue(RSVPSubmission.objects.filter(pk=sub.pk).exists())
+
+    def test_rsvp_delete_post_removes_submission(self):
+        sub, _ = self._make_submission()
+        self._login()
+        r = self.client.post(reverse('wedding:dashboard_rsvp_delete', args=[sub.pk]))
+        self.assertEqual(r.status_code, 302)
+        self.assertFalse(RSVPSubmission.objects.filter(pk=sub.pk).exists())
+
+    def test_rsvp_delete_resets_invited_guest_when_last_submission(self):
+        sub, guest = self._make_submission()
+        self._login()
+        self.client.post(reverse('wedding:dashboard_rsvp_delete', args=[sub.pk]))
+        guest.refresh_from_db()
+        self.assertFalse(guest.rsvped)
+        self.assertEqual(guest.current_guests, 0)
+
+    def test_rsvp_delete_keeps_status_when_other_submissions_remain(self):
+        sub1, guest = self._make_submission()
+        # Second submission for the same guest stays in place
+        RSVPSubmission.objects.create(
+            invited_guest=guest, attending=True,
+            email=guest.email, phone='',
+        )
+        self._login()
+        self.client.post(reverse('wedding:dashboard_rsvp_delete', args=[sub1.pk]))
+        guest.refresh_from_db()
+        self.assertTrue(guest.rsvped, 'rsvped flag must stay True while another submission exists')
+        self.assertEqual(guest.current_guests, 2)
+        self.assertEqual(RSVPSubmission.objects.filter(invited_guest=guest).count(), 1)
+
+    def test_rsvp_delete_redirects_to_rsvps_list(self):
+        sub, _ = self._make_submission()
+        self._login()
+        r = self.client.post(reverse('wedding:dashboard_rsvp_delete', args=[sub.pk]))
+        self.assertEqual(r.status_code, 302)
+        self.assertEqual(r['Location'], reverse('wedding:dashboard_rsvps'))
+
+
+class ImportGuestsCommandTests(TestCase):
+    def _write_csv(self, text):
+        fd, path = tempfile.mkstemp(suffix='.csv')
+        with os.fdopen(fd, 'w', encoding='utf-8') as f:
+            f.write(text)
+        self.addCleanup(os.remove, path)
+        return path
+
+    def test_command_creates_guests_from_csv(self):
+        path = self._write_csv(
+            'first_name,last_name,email,max_guests\n'
+            'Alice,Smith,alice@example.com,2\n'
+            'Bob,Jones,,3\n'
+            'Carol,Doe,carol@example.com,1\n'
+        )
+        call_command('import_guests', file=path)
+        self.assertEqual(InvitedGuest.objects.count(), 3)
+        bob = InvitedGuest.objects.get(first_name='Bob', last_name='Jones')
+        self.assertIsNone(bob.email, 'blank email must be stored as NULL, not ""')
+        self.assertEqual(bob.max_guests, 3)
+        carol = InvitedGuest.objects.get(email='carol@example.com')
+        self.assertEqual(carol.max_guests, 1)
+
+    def test_command_updates_existing_max_guests_and_skips_unchanged(self):
+        InvitedGuest.objects.create(
+            first_name='Alice', last_name='Smith',
+            email='alice@example.com', max_guests=2,
+        )
+        InvitedGuest.objects.create(
+            first_name='Bob', last_name='Jones',
+            email='bob@example.com', max_guests=4,
+        )
+        path = self._write_csv(
+            'first_name,last_name,email,max_guests\n'
+            'Alice,Smith,alice@example.com,5\n'   # changed → updated
+            'Bob,Jones,bob@example.com,4\n'       # unchanged → skipped
+        )
+        call_command('import_guests', file=path)
+        alice = InvitedGuest.objects.get(email='alice@example.com')
+        self.assertEqual(alice.max_guests, 5)
+        self.assertEqual(InvitedGuest.objects.count(), 2)

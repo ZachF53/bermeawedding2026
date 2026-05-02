@@ -73,6 +73,7 @@ desktop.ini
 *.sublime-project
 *.sublime-workspace
 .cursor/
+.claude/
 
 # ---------- DigitalOcean & deployment --------------------------------
 .do/app.yaml.local
