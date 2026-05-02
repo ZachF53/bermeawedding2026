@@ -361,6 +361,35 @@
     function showFormFromInvite(data) {
       inviteId = data.invite_id || data.id || null;
       maxGuests = data.max_guests || conf.maxGuests || 2;
+
+      // Already RSVPed → show the dedicated card and bail
+      if (data.rsvped && parseInt(data.rsvped) === 1) {
+        var lookupCard = document.getElementById('aw-rsvp-gate');
+        if (lookupCard) {
+          lookupCard.style.transition = 'opacity 0.4s ease';
+          lookupCard.style.opacity = '0';
+          setTimeout(function () { lookupCard.style.display = 'none'; }, 400);
+        }
+        var alreadyCard = document.getElementById('aw-already-rsvped');
+        if (alreadyCard) {
+          setTimeout(function () {
+            alreadyCard.style.display = 'block';
+            alreadyCard.style.opacity = '0';
+            alreadyCard.style.transition = 'opacity 0.6s ease';
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () {
+                alreadyCard.style.opacity = '1';
+              });
+            });
+            var nameSpan = document.getElementById('aw-already-name');
+            if (nameSpan && data.full_name) {
+              nameSpan.textContent = data.full_name.split(' ')[0]; // first name only
+            }
+          }, 450);
+        }
+        return;
+      }
+
       if (gate) gate.style.display = 'none';
       if (app) app.style.display = 'block';
       if (elHeaderMeta) elHeaderMeta.classList.remove('aw-hide-meta');
@@ -504,50 +533,78 @@
 
     if (elSubmit) {
       elSubmit.addEventListener('click', function () {
-        var payload = buildPayload();
+        // Prevent double click
+        if (elSubmit.disabled) return;
+
+        var p = buildPayload();
         refreshSummary();
-        if (!payload.guests.length || !payload.contact.email) {
-          if (elError) {
-            elError.hidden = false;
-            elError.textContent = 'Please add at least one guest and a contact email.';
-          }
+
+        if (!p.guests.length || !p.contact.email) {
+          if (elError) { elError.hidden = false; elError.textContent = "Please add at least one guest and an email address."; }
           if (elSuccess) elSuccess.hidden = true;
           return;
         }
 
+        // Disable button and show spinner
         elSubmit.disabled = true;
+        elSubmit.innerHTML = '<span class="aw-spinner"></span> Submitting...';
+        elSubmit.style.opacity = '0.8';
+        elSubmit.style.cursor = 'not-allowed';
+
+        if (elError) elError.hidden = true;
+        if (elSuccess) elSuccess.hidden = true;
+
         fetch(conf.restUrl, {
           method: 'POST',
-          credentials: 'same-origin',
           headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCookie('csrftoken')
           },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(p)
         })
-        .then(function (r) {
-          return r.json().then(function (body) { return { ok: r.ok, body: body }; });
-        })
-        .then(function (res) {
-          elSubmit.disabled = false;
-          if (res.ok && res.body && res.body.ok) {
-            if (elSuccess) elSuccess.hidden = false;
-            if (elError)   elError.hidden   = true;
-          } else {
-            if (elError) {
-              elError.hidden = false;
-              elError.textContent = (res.body && res.body.error) || "There's an issue with your RSVP. Please check required fields.";
-            }
-            if (elSuccess) elSuccess.hidden = true;
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+        .then(function () {
+          // Hide the entire form
+          var formApp = document.getElementById('aw-rsvp-app');
+          var lookupCard = document.getElementById('aw-rsvp-gate');
+
+          if (formApp) {
+            formApp.style.transition = 'opacity 0.4s ease';
+            formApp.style.opacity = '0';
+            setTimeout(function () { formApp.style.display = 'none'; }, 400);
+          }
+          if (lookupCard) {
+            lookupCard.style.transition = 'opacity 0.4s ease';
+            lookupCard.style.opacity = '0';
+            setTimeout(function () { lookupCard.style.display = 'none'; }, 400);
+          }
+
+          // Show thank you card
+          var thankYou = document.getElementById('aw-thank-you');
+          if (thankYou) {
+            setTimeout(function () {
+              thankYou.style.display = 'block';
+              thankYou.style.opacity = '0';
+              thankYou.style.transition = 'opacity 0.6s ease';
+              requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                  thankYou.style.opacity = '1';
+                });
+              });
+              thankYou.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 450);
           }
         })
         .catch(function () {
+          // Re-enable button on error
           elSubmit.disabled = false;
+          elSubmit.innerHTML = 'Submit RSVP';
+          elSubmit.style.opacity = '1';
+          elSubmit.style.cursor = 'pointer';
           if (elError) {
             elError.hidden = false;
-            elError.textContent = 'Network error. Please try again.';
+            elError.textContent = 'There was a problem submitting your RSVP. Please try again.';
           }
-          if (elSuccess) elSuccess.hidden = true;
         });
       });
     }

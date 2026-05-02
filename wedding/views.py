@@ -210,7 +210,12 @@ def rsvp_submit(request):
         logger.exception("RSVP submit failed")
         return JsonResponse({'ok': False, 'error': 'Could not save RSVP'}, status=500)
 
-    _send_rsvp_emails(submission, payload)
+    # Email is best-effort — never let it break the saved-RSVP response.
+    try:
+        _send_rsvp_emails(submission, payload)
+    except Exception as e:
+        logger.exception("RSVP email send failed: %s", e)
+
     return JsonResponse({'ok': True, 'id': submission.id})
 
 
@@ -220,18 +225,23 @@ def _send_rsvp_emails(submission, payload):
     contact_email = (contact.get('email') or '').strip()
     contact_phone = (contact.get('phone') or '').strip()
     notes = (payload.get('notes') or '').strip()
-    household = (payload.get('household') or '').strip() or f'{invited.first_name} {invited.last_name}'
+    household_name = (payload.get('household') or '').strip() or f'{invited.first_name} {invited.last_name}'
     submitted_at = (payload.get('submittedAt') or '').strip() or submission.submitted_at.isoformat()
     guests = payload.get('guests') or []
     top_events = payload.get('topEventSelections') or []
 
+    # Walk the party once: build the per-guest summary lines and capture the
+    # first guest's first name (used to greet the confirmation recipient).
     guest_lines = []
+    first_guest_name = ''
     for g in guests:
         if not isinstance(g, dict):
             continue
         name = (g.get('name') or '').strip()
         if not name:
             continue
+        if not first_guest_name:
+            first_guest_name = name.split()[0]
         gtype = (g.get('type') or '').strip()
         gevents = ', '.join(g.get('events') or [])
         line = f"  - {name}"
@@ -240,9 +250,11 @@ def _send_rsvp_emails(submission, payload):
         if gevents:
             line += f" — events: {gevents}"
         guest_lines.append(line)
+    if not first_guest_name:
+        first_guest_name = invited.first_name
 
-    body = (
-        f"Household: {household}\n\n"
+    summary_text = (
+        f"Household: {household_name}\n\n"
         f"Guests:\n"
         + ('\n'.join(guest_lines) if guest_lines else '  (none)')
         + "\n\n"
@@ -250,41 +262,61 @@ def _send_rsvp_emails(submission, payload):
         f"Contact:\n"
         f"  Email: {contact_email}\n"
         f"  Phone: {contact_phone or '—'}\n\n"
-        f"Notes:\n{notes or '—'}\n\n"
-        f"Submitted at: {submitted_at}\n"
+        f"Notes:\n{notes or '—'}\n"
     )
 
-    from_addr = settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER
-    notify = getattr(settings, 'NOTIFICATION_EMAIL', '') or (payload.get('notify') or '').strip()
+    notify_addr = getattr(settings, 'NOTIFICATION_EMAIL', '')
 
-    if notify:
+    # 1. Notification to the wedding couple
+    if notify_addr:
+        notification_text = (
+            f"New RSVP received!\n\n"
+            f"Submitted: {submitted_at}\n\n"
+            f"{summary_text}\n"
+            f"---\n"
+            f"Sent from bermeawedding2026.com\n"
+        )
         try:
             send_mail(
-                subject=f"New RSVP: {household}",
-                message=body,
-                from_email=from_addr,
-                recipient_list=[notify],
-                fail_silently=True,
+                subject='New RSVP — ' + household_name,
+                message=notification_text,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[notify_addr],
+                fail_silently=False,
             )
-        except Exception:
-            logger.exception("Failed to send notification email")
+        except Exception as e:
+            logger.exception("Notification email failed: %s", e)
 
-    if contact_email:
+    # 2. Confirmation to guest (only if their address differs from the couple's)
+    if contact_email and contact_email != notify_addr:
+        confirmation_text = (
+            f"Hi {first_guest_name},\n\n"
+            f"Thank you for your RSVP! We're so excited to celebrate with you.\n\n"
+            f"Here's a summary of your RSVP:\n\n"
+            f"{summary_text}\n"
+            f"Wedding Details:\n"
+            f"  Date: Saturday, September 5, 2026\n"
+            f"  Time: Ceremony at 5:30 PM | Doors open at 5:00 PM\n"
+            f"  Venue: The Skyline\n"
+            f"  Address: 707 Dawson St, San Antonio, TX 78202\n\n"
+            f"Dress Code: Semi-Formal (required)\n"
+            f"Hashtag: #BermeaEverAfter\n\n"
+            f"If you need to make any changes, please contact us at:\n"
+            f"bermeawedding@outlook.com\n\n"
+            f"We can't wait to see you!\n\n"
+            f"With love,\n"
+            f"Brian & Aisha\n"
+        )
         try:
             send_mail(
-                subject="Your RSVP for Brian & Aisha",
-                message=(
-                    f"Thank you, {invited.first_name}!\n\n"
-                    f"We've received your RSVP. Here is a copy for your records:\n\n"
-                    + body
-                    + "\nIf anything looks off, just reply to this email and we'll fix it.\n"
-                ),
-                from_email=from_addr,
+                subject='Your RSVP is confirmed — Brian & Aisha Wedding',
+                message=confirmation_text,
+                from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[contact_email],
-                fail_silently=True,
+                fail_silently=False,
             )
-        except Exception:
-            logger.exception("Failed to send confirmation email")
+        except Exception as e:
+            logger.exception("Confirmation email failed: %s", e)
 
 
 # ----------------------------- Dashboard ------------------------------

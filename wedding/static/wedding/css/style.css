@@ -531,3 +531,19 @@ input, textarea, select, button { font-family: 'Lora', serif; }
 }
 
 .aw-hidden { display: none !important; }
+
+.aw-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: aw-spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+@keyframes aw-spin {
+  to { transform: rotate(360deg); }
+}

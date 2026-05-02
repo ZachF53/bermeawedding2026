@@ -101,13 +101,23 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+# Email — SendGrid
+# To test without sending real emails, set SENDGRID_SANDBOX_MODE_IN_DEBUG = True
+# To send real emails in all environments, keep it False.
+EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', '')
+SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+DEFAULT_FROM_EMAIL = 'zacherylong@aspiredwebsites.com'
+SERVER_EMAIL = 'zacherylong@aspiredwebsites.com'
+
+# Fallback SMTP (only used if SendGrid key is missing — switch EMAIL_BACKEND
+# to 'django.core.mail.backends.smtp.EmailBackend' to use these instead)
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.sendgrid.net')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'apikey')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes')
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
 NOTIFICATION_EMAIL = os.getenv('NOTIFICATION_EMAIL', 'bermeawedding@outlook.com')
 
 RSVP_SECRET = os.getenv('RSVP_SECRET', '4uSTHu0SsCu5olLeBEPI19n0W7TQhWtj')

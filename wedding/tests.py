@@ -38,6 +38,15 @@ class PublicPagesTests(TestCase):
         response = self.client.get(reverse('wedding:rsvp'))
         self.assertContains(response, 'window.AW_RSVP_CONF')
 
+    def test_rsvp_has_thank_you_card(self):
+        response = self.client.get(reverse('wedding:rsvp'))
+        self.assertContains(response, 'id="aw-thank-you"')
+
+    def test_rsvp_has_already_rsvped_card(self):
+        response = self.client.get(reverse('wedding:rsvp'))
+        self.assertContains(response, 'id="aw-already-rsvped"')
+        self.assertContains(response, 'id="aw-already-name"')
+
     # -- WordPress mirror: navbar/hero/static-path expectations -----
 
     def test_no_navbar_in_base(self):
@@ -256,6 +265,93 @@ class RSVPSubmitTests(TestCase):
         response = self._post(payload)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()['ok'])
+
+
+@override_settings(
+    EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
+    NOTIFICATION_EMAIL='couple@example.com',
+    DEFAULT_FROM_EMAIL='zacherylong@aspiredwebsites.com',
+)
+class RSVPEmailTests(TestCase):
+    """Email behaviour around rsvp_submit: from-address, subjects, dedupe,
+    and graceful failure when the email backend itself blows up."""
+
+    def setUp(self):
+        self.guest = InvitedGuest.objects.create(
+            first_name='Alice', last_name='Smith',
+            email='alice@example.com', max_guests=2,
+        )
+
+    def _payload(self, **overrides):
+        base = {
+            'household': 'Smith Household',
+            'invite_id': self.guest.id,
+            'maxGuests': 2,
+            'events': [{'id': 'ceremony', 'label': 'Ceremony'}],
+            'topEventSelections': ['Ceremony'],
+            'guests': [
+                {'id': 'g1', 'name': 'Alice Smith', 'type': 'adult', 'events': ['Ceremony']},
+            ],
+            'contact': {'email': 'alice@example.com', 'phone': ''},
+            'notes': '',
+            'notify': '',
+            'secret': settings.RSVP_SECRET,
+            'hp': '',
+            'submittedAt': '2026-08-01T12:00:00Z',
+        }
+        base.update(overrides)
+        return base
+
+    def _post(self, payload):
+        return self.client.post(
+            reverse('wedding:rsvp_submit'),
+            data=json.dumps(payload),
+            content_type='application/json',
+        )
+
+    def test_two_emails_when_addresses_differ(self):
+        mail.outbox = []
+        r = self._post(self._payload())
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(mail.outbox), 2)
+        recipients = sorted(addr for m in mail.outbox for addr in m.to)
+        self.assertEqual(recipients, ['alice@example.com', 'couple@example.com'])
+
+    def test_one_email_when_contact_matches_notification(self):
+        mail.outbox = []
+        r = self._post(self._payload(contact={'email': 'couple@example.com'}))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ['couple@example.com'])
+
+    def test_notification_subject_contains_new_rsvp(self):
+        mail.outbox = []
+        self._post(self._payload())
+        notif = next(m for m in mail.outbox if 'couple@example.com' in m.to)
+        self.assertIn('New RSVP', notif.subject)
+        self.assertIn('Smith Household', notif.subject)
+
+    def test_confirmation_subject_contains_confirmed(self):
+        mail.outbox = []
+        self._post(self._payload())
+        conf = next(m for m in mail.outbox if 'alice@example.com' in m.to)
+        self.assertIn('confirmed', conf.subject.lower())
+
+    def test_emails_use_zacherylong_from_address(self):
+        mail.outbox = []
+        self._post(self._payload())
+        self.assertTrue(mail.outbox)
+        for m in mail.outbox:
+            self.assertEqual(m.from_email, 'zacherylong@aspiredwebsites.com')
+
+    def test_rsvp_succeeds_when_email_send_fails(self):
+        from unittest.mock import patch
+        with patch('wedding.views.send_mail', side_effect=Exception('SMTP down')):
+            r = self._post(self._payload())
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r.json()['ok'])
+        # The submission must still have been saved
+        self.assertEqual(RSVPSubmission.objects.filter(invited_guest=self.guest).count(), 1)
 
 
 class DashboardTests(TestCase):
